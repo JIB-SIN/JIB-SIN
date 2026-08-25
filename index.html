@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
+    <title>집중의 신</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@600;800&family=Montserrat:wght@500;700&family=Pretendard:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* --- 테마 및 기본 설정 --- */
+        :root {
+            --bg-main: #FFF9F1; --panel-bg: #FFFFFF; --border-color: #E6DFD7;
+            --text-main: #4A4036; --text-sub: #9E9181; --accent: #D4A373; 
+            --accent-hover: #BB8C5D; --flame: #F4A261; --shadow: 0 10px 30px rgba(138, 115, 92, 0.08);
+            --transition: all 0.3s ease;
+        }
+        [data-theme="dark"] {
+            --bg-main: #1A1A1A; --panel-bg: #2C2C2C; --border-color: #3D3D3D;
+            --text-main: #E2E8F0; --text-sub: #94A3B8; --accent: #D4A373;
+            --shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg-main); color: var(--text-main); font-family: 'Pretendard', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
+        body.no-scroll { overflow: hidden; }
+
+        header { width: 100%; max-width: 1200px; padding: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .brand-logo { font-family: 'Hahmlet', serif; font-size: 1.8rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+        .brand-logo img { width: 40px; height: 40px; border-radius: 0; object-fit: contain; }
+        
+        nav { display: flex; gap: 0.5rem; background: var(--panel-bg); padding: 0.5rem; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow); flex-wrap: wrap; }
+        .nav-btn { background: none; border: none; padding: 0.6rem 1rem; border-radius: 12px; cursor: pointer; font-weight: 600; color: var(--text-sub); transition: var(--transition); }
+        .nav-btn.active { background: var(--text-main); color: var(--bg-main); }
+        
+        .header-actions { display: flex; gap: 0.5rem; }
+        .action-btn { background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.6rem 1rem; border-radius: 12px; cursor: pointer; font-weight: 600; transition: var(--transition); }
+        .action-btn:hover { background: var(--border-color); }
+
+        .container { width: 100%; max-width: 1200px; padding: 0 2rem 3rem; display: none; gap: 2rem; animation: fadeIn 0.4s ease; }
+        .container.active { display: flex; }
+        @media (max-width: 900px) { .container { flex-direction: column; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .left-col, .right-col { flex: 1; display: flex; flex-direction: column; gap: 2rem; }
+        .panel { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 2rem; box-shadow: var(--shadow); position: relative; }
+        .panel-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+        .panel-title-text { display: flex; align-items: center; gap: 0.6rem; }
+
+        /* --- 집중 모드 스타일 --- */
+        .timer-panel { display: flex; flex-direction: column; align-items: center; transition: all 0.4s ease; }
+        .btn-focus { background: var(--bg-main); border: 1px solid var(--border-color); padding: 0.4rem 0.8rem; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 6px; font-size: 0.9rem; }
+        .btn-focus:hover { background: var(--accent); color: white; border-color: var(--accent); }
+        
+        .exit-focus-btn { display: none; position: fixed; top: 1.5rem; right: 1.5rem; background: rgba(0,0,0,0.5); color: white; border: none; padding: 0.8rem 1.2rem; border-radius: 12px; font-size: 1rem; cursor: pointer; z-index: 10005; }
+
+        .timer-panel.focus-mode { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10000; border-radius: 0; background: var(--bg-main); justify-content: flex-start; padding: 8rem 2rem 2rem 2rem; }
+        .timer-panel.focus-mode .panel-title,
+        .timer-panel.focus-mode .time-options,
+        .timer-panel.focus-mode .sprout-status,
+        .timer-panel.focus-mode .mode-switch { display: none; }
+        .timer-panel.focus-mode .huge-time { font-size: 8vw; margin: 1rem 0; }
+        .timer-panel.focus-mode .candle-wrapper { transform: scale(1.1); margin: 2rem 0; }
+        .timer-panel.focus-mode .btn-set { max-width: 400px; margin: 0 auto; }
+        .timer-panel.focus-mode ~ .exit-focus-btn { display: block; }
+
+        .focus-audio-bar { display: none; position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--panel-bg); border: 1px solid var(--border-color); padding: 0.6rem 1.5rem; border-radius: 30px; gap: 1rem; align-items: center; box-shadow: var(--shadow); z-index: 10005; width: max-content; }
+        .timer-panel.focus-mode ~ .focus-audio-bar { display: flex; animation: fadeIn 0.5s ease; }
+        .fa-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; opacity: 0.5; transition: 0.3s; }
+        .fa-btn.active { opacity: 1; transform: scale(1.2); }
+        .mini-vol { width: 80px; accent-color: var(--accent); }
+
+        @media (max-width: 600px) {
+            .timer-panel.focus-mode { padding-top: 6rem; }
+            .focus-audio-bar { top: auto; bottom: 2rem; padding: 0.5rem 1rem; gap: 0.5rem; }
+            .mini-vol { width: 60px; }
+            .exit-focus-btn { top: 1rem; right: 1rem; padding: 0.6rem 1rem; }
+            .timer-panel.focus-mode .huge-time { font-size: 15vw; }
+            .timer-panel.focus-mode .candle-wrapper { transform: scale(1.0); margin: 1.5rem 0; }
+        }
+
+        /* --- 타이머 & 촛불 --- */
+        .mode-switch { display: flex; background: var(--bg-main); border-radius: 12px; padding: 0.3rem; margin-bottom: 1rem; border: 1px solid var(--border-color); width: 100%; }
+        .mode-btn { flex: 1; padding: 0.6rem; border-radius: 8px; border: none; background: transparent; color: var(--text-sub); font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .mode-btn.active { background: var(--panel-bg); color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+        .sprout-status { background: var(--bg-main); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 20px; text-align: center; margin-bottom: 1rem; font-weight: 600; font-size: 0.95rem; width: 100%; }
+
+        .candle-wrapper { height: 180px; display: flex; align-items: flex-end; justify-content: center; position: relative; margin: 1rem 0; width: 100%; transition: transform 0.4s; }
+        .candle-glow { position: absolute; bottom: 30px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(244, 162, 97, 0.3) 0%, transparent 70%); border-radius: 50%; opacity: 0; pointer-events: none; transition: opacity 1s; mix-blend-mode: screen; }
+        .candle-glow.active { opacity: 1; animation: pulseGlow 4s infinite alternate; }
+        @keyframes pulseGlow { 0% { transform: scale(1); opacity: 0.4; } 100% { transform: scale(1.1); opacity: 0.6; } }
+        .candle { width: 40px; height: 100%; background: linear-gradient(to right, #FFF4E6, #FFE4C4); border-radius: 4px 4px 10px 10px; position: relative; transition: height 1s linear; }
+        [data-theme="dark"] .candle { background: linear-gradient(to right, #D4C4B1, #A89C8D); }
+        .wick { width: 4px; height: 10px; background: #333; position: absolute; top: -10px; left: 18px; border-radius: 2px; }
+        .flame { width: 18px; height: 30px; background: #FF9D00; border-radius: 50% 50% 20% 20%; position: absolute; top: -38px; left: 11px; box-shadow: 0 0 20px #FF9D00, 0 0 40px #FF5E00; display: none; transform-origin: bottom center; }
+        .flame.active { display: block; animation: flicker 0.4s infinite alternate ease-in-out; }
+        @keyframes flicker { 0% { transform: rotate(-1deg) scale(0.95); background: #FF9D00; } 100% { transform: rotate(1deg) scale(1.05); background: #FFB347; } }
+
+        .huge-time { font-family: 'Montserrat', sans-serif; font-size: 4.5rem; font-weight: 700; letter-spacing: -2px; margin: 0.5rem 0; text-align: center; z-index: 2; transition: font-size 0.4s; }
+        
+        .time-options { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.5rem; width: 100%; }
+        .btn-time { padding: 0.6rem 1rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-main); font-weight: 600; cursor: pointer; flex: 1; white-space: nowrap; }
+
+        .btn-set { display: flex; gap: 0.8rem; width: 100%; transition: max-width 0.4s; }
+        .btn { padding: 1rem; border-radius: 12px; border: none; font-weight: 700; font-size: 1.1rem; cursor: pointer; white-space: nowrap; }
+        .btn-main { background: var(--text-main); color: var(--bg-main); flex: 2; }
+        .btn-sub { background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color); flex: 1; }
+
+        /* --- 턴테이블 & 오디오 --- */
+        .turntable-deck { width: 100%; max-width: 260px; height: 180px; background: #E8DCCB; border-radius: 16px; position: relative; box-shadow: inset 0 0 20px rgba(0,0,0,0.05); border: 2px solid #d4c4b1; margin: 0 auto 1.5rem; }
+        [data-theme="dark"] .turntable-deck { background: #3a3229; border-color: #2c251e; }
+        .vinyl { width: 150px; height: 150px; background: #1a1a1a; border-radius: 50%; position: absolute; top: 13px; left: 15px; border: 4px solid #2d2d2d; display: flex; justify-content: center; align-items: center; transition: transform 0.5s ease; }
+        .vinyl.playing { animation: spin 4s linear infinite; }
+        .vinyl-label { width: 45px; height: 45px; border-radius: 50%; background-color: var(--accent); background-size: cover; border: 2px solid #fff; display: flex; justify-content: center; align-items: center; z-index: 2; }
+        .vinyl-hole { width: 8px; height: 8px; background: #E8DCCB; border-radius: 50%; }
+        
+        .tonearm { position: absolute; top: 25px; right: 25px; width: 12px; height: 110px; background: #dcdcdc; border-radius: 6px; transform-origin: 6px 12px; transform: rotate(-40deg); transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); z-index: 10; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); }
+        .tonearm::after { content: ''; position: absolute; bottom: -5px; left: -4px; width: 20px; height: 35px; background: #444; border-radius: 4px; }
+        .tonearm.playing { transform: rotate(32deg); } 
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .audio-controls { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .audio-btn { flex: 1; padding: 0.8rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-main); font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .audio-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .volume-slider { width: 100%; accent-color: var(--accent); cursor: pointer; }
+
+        /* --- 체크리스트 & 쓰레기통 --- */
+        .todo-input { width: 100%; padding: 1rem; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-main); color: var(--text-main); outline: none; margin-bottom: 1rem; }
+        .todo-list { list-style: none; overflow-y: auto; max-height: 250px; }
+        .todo-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem 0; border-bottom: 1px solid var(--bg-main); }
+        .todo-item input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+        .todo-item span { flex: 1; font-weight: 500; }
+        .todo-item.done span { text-decoration: line-through; color: var(--text-sub); }
+        .todo-del-btn { background: none; border: none; color: var(--text-sub); cursor: pointer; font-size: 1.1rem; }
+
+        .brain-dump-textarea { width: 100%; height: 70px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; resize: none; outline: none; color: var(--text-main); font-family: inherit; margin-bottom: 0.5rem; transition: color 0.3s, text-shadow 0.3s; }
+        .btn-burn { background: var(--text-main); color: var(--bg-main); border: none; padding: 0.6rem 1rem; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
+        .burning-text { animation: textBurn 1.5s forwards; }
+        @keyframes textBurn { 0% { color: var(--text-main); text-shadow: none; } 40% { color: var(--flame); text-shadow: 0 -2px 10px #FF5E00; } 100% { color: transparent; text-shadow: 0 -15px 20px transparent; } }
+
+        /* 통계 박스 스타일 */
+        .stats-box { display: flex; justify-content: space-around; background: var(--bg-main); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border-color); text-align: center; }
+        .stats-box > div { flex: 1; }
+        .stat-title { font-size: 0.9rem; color: var(--text-sub); font-weight: 600; margin-bottom: 0.5rem; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); font-family: 'Montserrat', sans-serif; }
+
+        /* --- 식물 키우기 페이지 --- */
+        #page-plant { flex-direction: column; position: relative; }
+        .garden-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 1rem; }
+        .btn-to-garden { background: var(--accent); color: white; border: none; padding: 0.6rem 1rem; border-radius: 12px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn-to-garden:hover { transform: translateY(-2px); opacity: 0.9; }
+        
+        .plant-area-container { background: linear-gradient(to bottom, #FFF5E6 0%, #FFECD1 100%); border-radius: 24px; padding: 2rem; min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; box-shadow: inset 0 0 20px rgba(0,0,0,0.05); border: 4px solid #fff; position: relative; }
+        [data-theme="dark"] .plant-area-container { background: linear-gradient(to bottom, #2C251E 0%, #1A1510 100%); border-color: #3D3D3D; }
+        
+        .main-plant-area { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1; position: relative; border-bottom: 15px solid #8B5A2B; width: 100%; border-radius: 0 0 20px 20px; z-index: 10; padding-bottom: 10px;}
+        [data-theme="dark"] .main-plant-area { border-bottom: 15px solid #4A3018; }
+        
+        .big-plant { font-size: 8rem; margin-bottom: -10px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); transform-origin: bottom center; animation: swayPlant 5s ease-in-out infinite alternate; transition: all 0.5s ease; position: relative; }
+        .big-plant.level-up { animation: levelUpBounce 0.8s ease; }
+        @keyframes swayPlant { 0% { transform: rotate(-4deg); } 100% { transform: rotate(4deg); } }
+        @keyframes levelUpBounce { 0% { transform: scale(1); } 50% { transform: scale(1.3) translateY(-20px); filter: brightness(1.2); } 100% { transform: scale(1); } }
+        
+        .floating-exp { position: absolute; color: #FF9800; font-weight: bold; font-size: 1.5rem; text-shadow: 0 2px 5px rgba(0,0,0,0.2); animation: floatUp 1s forwards ease-out; pointer-events: none; z-index: 20; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-50px) scale(1.2); } }
+
+        .plant-info { background: rgba(255,255,255,0.9); padding: 0.8rem 1.5rem; border-radius: 20px; font-weight: bold; color: #333; margin-top: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; z-index: 15; position: relative; min-width: 200px; }
+        [data-theme="dark"] .plant-info { background: rgba(44, 44, 44, 0.9); color: #E2E8F0; }
+        .exp-bar-bg { width: 100%; height: 10px; background: #ddd; border-radius: 5px; margin-top: 8px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
+        [data-theme="dark"] .exp-bar-bg { background: #444; }
+        .exp-bar-fill { height: 100%; background: linear-gradient(90deg, #8BC34A, #4CAF50); width: 0%; transition: width 0.4s ease-out; }
+
+        .inventory-panel { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; width: 100%; align-items: center; z-index: 15; position: relative; }
+        .inv-buttons-row { display: flex; gap: 1rem; justify-content: center; width: 100%; }
+        
+        .inv-btn { background: var(--panel-bg); border: 2px solid var(--border-color); padding: 1rem 1.5rem; border-radius: 16px; font-weight: 700; font-size: 1.1rem; cursor: pointer; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem; transition: 0.2s; box-shadow: var(--shadow); }
+        .inv-btn:hover { border-color: var(--accent); transform: translateY(-3px); }
+        .inv-btn:active { transform: translateY(0); }
+        .inv-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; border-color: var(--border-color); }
+        
+        .btn-harvest { background: #FF9800; color: white; padding: 1rem 2rem; border-radius: 30px; font-size: 1.2rem; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4); animation: pulseBtn 1.5s infinite; display: none; margin-top: 1rem; }
+        @keyframes pulseBtn { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        /* 씨앗 선택 모달 스타일 */
+        .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); animation: fadeIn 0.3s ease; backdrop-filter: blur(3px); }
+        .modal-content { background-color: var(--panel-bg); margin: 12% auto; padding: 30px; border-radius: 24px; width: 90%; max-width: 520px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); border: 1px solid var(--border-color); position: relative; }
+        .modal-content h3 { font-size: 1.5rem; margin-bottom: 10px; }
+        .plant-type-options { display: flex; justify-content: space-around; gap: 10px; margin-top: 25px; flex-wrap: wrap; }
+        .seed-card { flex: 1; min-width: 120px; background: var(--bg-main); border: 2px solid var(--border-color); border-radius: 16px; padding: 20px 10px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .seed-card:hover { border-color: var(--accent); transform: translateY(-5px); background: #FFF5E6; }
+        [data-theme="dark"] .seed-card:hover { background: #3a3229; }
+        .seed-emoji { font-size: 3rem; }
+        .seed-name { font-weight: bold; color: var(--text-main); }
+
+        /* --- 온보딩(튜토리얼) 팝업 전용 스타일 --- */
+        .tutorial-card { display: none; flex-direction: column; align-items: center; gap: 1rem; text-align: center; animation: fadeIn 0.4s ease; min-height: 280px; justify-content: center; }
+        .tutorial-card.active { display: flex; }
+        .tutorial-icon { font-size: 4rem; margin-bottom: 0.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+        .tutorial-title { font-size: 1.4rem; font-weight: 800; color: var(--text-main); word-break: keep-all; }
+        .tutorial-desc { font-size: 0.95rem; color: var(--text-sub); line-height: 1.6; word-break: keep-all; }
+        .tutorial-highlight { color: var(--accent); font-weight: bold; }
+
+        .tutorial-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); width: 100%; }
+        .tutorial-dots { display: flex; gap: 6px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-color); transition: 0.3s; }
+        .dot.active { background: var(--accent); width: 20px; border-radius: 10px; }
+        .tut-btn { padding: 0.6rem 1.2rem; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+        .tut-btn-prev { background: var(--bg-main); color: var(--text-sub); border: 1px solid var(--border-color); }
+        .tut-btn-next { background: var(--text-main); color: var(--bg-main); }
+        .tut-skip { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text-sub); font-size: 1.2rem; cursor: pointer; }
+
+        /* --- 정원 보기 페이지 --- */
+        #page-garden-view { flex-direction: column; }
+        .garden-container { width: 100%; height: 600px; border-radius: 24px; border: 1px solid var(--border-color); box-shadow: var(--shadow); overflow: hidden; position: relative; }
+        .sky { height: 60%; background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%); position: relative; }
+        [data-theme="dark"] .sky { background: linear-gradient(to bottom, #191970 0%, #2A2A5A 100%); }
+        .sky::after { content: '☁️'; position: absolute; top: 30px; left: 50px; font-size: 3rem; opacity: 0.6; }
+        .sky::before { content: '☁️'; position: absolute; top: 70px; right: 80px; font-size: 4rem; opacity: 0.5; }
+        .fence { height: 10%; background-color: #A0522D; border-top: 3px solid #8B4513; border-bottom: 3px solid #8B4513; position: relative; }
+        .fence::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: repeating-linear-gradient(90deg, #A0522D, #A0522D 12px, #8B4513 12px, #8B4513 15px); }
+        .ground { height: 30%; background: linear-gradient(to bottom, #A8E6CF 0%, #7CB342 100%); display: flex; flex-wrap: wrap; gap: 15px; padding: 25px; overflow-y: auto; align-content: flex-start; justify-content: center; }
+        [data-theme="dark"] .ground { background: linear-gradient(to bottom, #388E3C 0%, #1B5E20 100%); }
+        .completed-plant-card { background-color: rgba(255, 255, 255, 0.85); border-radius: 15px; padding: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05); transition: transform 0.2s; width: 120px; }
+        .completed-plant-card:hover { transform: translateY(-5px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+        [data-theme="dark"] .completed-plant-card { background-color: rgba(0, 0, 0, 0.6); border-color: rgba(255,255,255,0.1); }
+        .completed-plant-emoji { font-size: 3.5rem; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.15)); }
+        .completed-date { font-size: 0.85rem; color: var(--text-sub); margin-top: 8px; font-weight: 600; font-family: 'Montserrat', sans-serif; }
+
+        /* --- 생명과학적 원리 페이지 (2x2 그리드 카드로 수정) --- */
+        #page-principles { flex-direction: column; }
+        .principles-header-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .principles-subtext { color: var(--text-sub); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
+        .principles-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; width: 100%; }
+        @media (max-width: 850px) { .principles-grid { grid-template-columns: 1fr; } }
+        
+        .principle-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 1.8rem; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 1rem; transition: var(--transition); }
+        .principle-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+        .principle-card-header { display: flex; align-items: flex-start; gap: 1rem; }
+        .principle-icon-box { width: 46px; height: 46px; border-radius: 12px; background: var(--bg-main); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: var(--accent); flex-shrink: 0; }
+        .principle-title-text { font-size: 1.1rem; font-weight: 700; color: var(--text-main); line-height: 1.4; }
+        
+        .connected-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600; color: var(--accent); background: var(--bg-main); padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); width: fit-content; margin-top: 0.2rem; }
+        .principle-details { font-size: 0.92rem; color: var(--text-sub); line-height: 1.6; display: flex; flex-direction: column; gap: 0.8rem; margin-top: 0.5rem; }
+        .principle-item-title { font-weight: 700; color: var(--text-main); margin-bottom: 0.2rem; display: flex; align-items: center; gap: 6px; }
+
+        /* --- 뇌 피로도 & 집중 유형 테스트 (개편안) --- */
+        #page-test { flex-direction: column; }
+        .test-sec { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .test-sec-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; }
+        
+        .mbti-q-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 1.2rem 1.5rem; margin-bottom: 1rem; }
+        .mbti-q-text { font-weight: 600; font-size: 0.98rem; margin-bottom: 1.2rem; color: var(--text-main); }
+        
+        .likert-scale-box { display: flex; justify-content: space-between; align-items: center; max-width: 520px; margin: 0 auto; padding: 0 10px; }
+        .likert-label-row { display: flex; justify-content: space-between; max-width: 540px; margin: 0.6rem auto 0; font-size: 0.8rem; font-weight: 600; color: var(--text-sub); }
+        
+        .likert-opt { display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; }
+        .likert-opt input[type="radio"] { appearance: none; -webkit-appearance: none; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; transition: all 0.2s ease; outline: none; background: var(--bg-main); }
+        .likert-opt input[type="radio"]:checked { border-color: var(--accent); background-color: var(--accent); box-shadow: inset 0 0 0 3px var(--panel-bg); }
+        
+        /* 5단계 크기 차등 */
+        .likert-opt.size-5 input { width: 34px; height: 34px; }
+        .likert-opt.size-4 input { width: 28px; height: 28px; }
+        .likert-opt.size-3 input { width: 22px; height: 22px; }
+        .likert-opt.size-2 input { width: 28px; height: 28px; }
+        .likert-opt.size-1 input { width: 34px; height: 34px; }
+
+        #test-result-container { display: none; margin-top: 1.5rem; padding: 2rem; border-radius: 20px; animation: fadeIn 0.5s ease; text-align: left; background: var(--panel-bg); border: 1px solid var(--border-color); box-shadow: var(--shadow); }
+        .result-level-badge { display: inline-block; padding: 0.4rem 1rem; border-radius: 20px; font-weight: 800; font-size: 0.9rem; margin-bottom: 1rem; }
+        .result-level-1 { background: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; }
+        .result-level-2 { background: #FFF8E1; color: #F57F17; border: 1px solid #FFECB3; }
+        .result-level-3 { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
+
+        .result-card-box { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.5rem; margin: 1rem 0 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; }
+        .result-info-row { line-height: 1.6; font-size: 0.95rem; }
+        .result-info-row strong { color: var(--text-main); }
+
+        .indicator-box { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 1.2rem; }
+        .indicator-item { text-align: left; }
+        .indicator-label { display: flex; justify-content: space-between; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--text-main); }
+        .indicator-bg { width: 100%; height: 12px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
+        .indicator-fill { height: 100%; background: var(--accent); border-radius: 6px; width: 0%; transition: width 0.8s ease-out; }
+
+        .retry-btn { margin-top: 1.8rem; padding: 0.9rem 1.8rem; background: var(--text-main); color: var(--bg-main); border: none; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1rem; transition: 0.2s; }
+        .retry-btn:hover { opacity: 0.9; }
+
+        /* 팁 카드 */
+        #page-tips { flex-direction: column; }
+        .tip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        @media (max-width: 900px) { .tip-grid { grid-template-columns: 1fr; } }
+        .tip-card { padding: 1.5rem; background: var(--bg-main); border-radius: 16px; border: 1px solid var(--border-color); }
+        .tip-card i { font-size: 2rem; color: var(--accent); margin-bottom: 1rem; display: block; }
+
+        /* --- 관리자 모드 스타일 --- */
+        .admin-trigger { position: fixed; bottom: 10px; right: 10px; font-size: 0.7rem; color: var(--text-sub); opacity: 0.1; cursor: pointer; z-index: 1000; border: none; background: transparent; transition: 0.3s; }
+        .admin-trigger:hover { opacity: 0.8; }
+        
+        .admin-panel-overlay { display: none; position: fixed; bottom: 40px; right: 20px; width: 320px; background: var(--panel-bg); border: 2px solid #dc3545; border-radius: 20px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 10010; animation: fadeIn 0.3s ease; }
+        .admin-panel-overlay h3 { margin-bottom: 1rem; color: #dc3545; font-size: 1.1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+        .close-admin { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-sub); }
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+        .admin-btn { padding: 0.8rem; font-size: 0.85rem; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text-main); transition: 0.2s; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
+        .admin-btn i { font-size: 1.2rem; }
+        .admin-btn:hover { background: #f0f0f0; }
+        [data-theme="dark"] .admin-btn:hover { background: #3d3d3d; }
+        .admin-full-btn { grid-column: 1 / -1; flex-direction: row; }
+/* --- 모바일 화면(600px 이하) 여백 다이어트 --- */
+@media (max-width: 600px) {
+    /* 1. 헤더와 전체 컨테이너 여백 줄이기 */
+    header { padding: 1rem; }
+    .container { padding: 0 1rem 2rem; gap: 1rem; }
+    
+    /* 2. 패널(박스) 내부 여백 줄여서 콘텐츠 공간 확보 */
+    .panel { padding: 1.2rem; }
+    
+    /* 3. 모바일에서 타이머 글씨가 너무 꽉 차지 않게 조절 */
+    .huge-time { font-size: 3.5rem; }
+    
+    /* 4. 네비게이션 메뉴(탭) 텍스트 크기 조절 및 간격 최적화 */
+    nav { justify-content: center; }
+    .nav-btn { font-size: 0.85rem; padding: 0.5rem 0.8rem; }
+    
+    /* 5. 팁 카드 / 원리 카드 1단 배열 시 여백 조절 */
+    .principle-card { padding: 1.2rem; }
+    .tip-card { padding: 1.2rem; }
+}
+    </style>
+</head>
+<body>
+
+    <audio id="audio-nature" loop src="forest.mp3"></audio>
+    <audio id="audio-rain" loop src="rain.mp3"></audio>
+    <audio id="audio-fire" loop src="fire.mp3"></audio>
+
+    <header>
+        <div class="brand-logo">
+            <img src="KakaoTalk_20260524_225821925.jpg" alt="로고"> 집중의 신
+        </div>
+        <nav>
+            <button class="nav-btn active" onclick="navTo('workspace')">워크스페이스</button>
+            <button class="nav-btn" onclick="navTo('plant')">식물 키우기 🌱</button>
+            <button class="nav-btn" onclick="navTo('garden-view')">나의 정원 🏡</button>
+            <button class="nav-btn" onclick="navTo('principles')">생명과학적 원리 🧬</button>
+            <button class="nav-btn" onclick="navTo('test')">진단 테스트</button>
+            <button class="nav-btn" onclick="navTo('tips')">집중 팁 💡</button>
+        </nav>
+        <div class="header-actions">
+            <button class="action-btn" onclick="openTutorial()"><i class="fa-solid fa-circle-question"></i> 가이드</button>
+            <button class="action-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i> 테마 변경</button>
+        </div>
+    </header>
+
+    <!-- 첫 실행 튜토리얼 (온보딩 모달) -->
+    <div id="tutorial-modal" class="modal">
+        <div class="modal-content">
+            <button class="tut-skip" onclick="closeTutorial()"><i class="fa-solid fa-xmark"></i></button>
+
+            <!-- 1단계: 반가워요 -->
+            <div class="tutorial-card active" id="tut-step-1">
+                <div class="tutorial-icon">🔥</div>
+                <div class="tutorial-title">반가워요! '집중의 신'입니다</div>
+                <div class="tutorial-desc">
+                    공부에 몰입하지 못해 고민이셨나요?<br>
+                    타이머로 집중 시간을 기록하고, 나만의 식물을 키우면서 재미있게 <span class="tutorial-highlight">집중 습관</span>을 만들어보세요!
+                </div>
+            </div>
+
+            <!-- 2단계: 아이템 얻는 법 -->
+            <div class="tutorial-card" id="tut-step-2">
+                <div class="tutorial-icon">🌧️🚿</div>
+                <div class="tutorial-title">타이머를 완료해 아이템을 얻으세요!</div>
+                <div class="tutorial-desc">
+                    워크스페이스에서 타이머를 맞춰 공부를 달성하면 보상이 지급됩니다.<br><br>
+                    • 10분 이상 집중: <span class="tutorial-highlight">비구름 🌧️ (+10 EXP)</span><br>
+                    • 30분 이상 집중: <span class="tutorial-highlight">물뿌리개 🚿 (+20 EXP)</span><br>
+                    (60분/120분 달성 시 물뿌리개를 2개, 5개씩 드려요!)
+                </div>
+            </div>
+
+            <!-- 3단계: 식물 키우는 법 -->
+            <div class="tutorial-card" id="tut-step-3">
+                <div class="tutorial-icon">🌱</div>
+                <div class="tutorial-title">식물 키우는 방법</div>
+                <div class="tutorial-desc">
+                    1. <b>'식물 키우기'</b> 탭에서 원하는 씨앗을 선택하세요.<br>
+                    2. 얻은 <b>비구름과 물뿌리개</b>를 써서 경험치를 채워주세요.<br>
+                    3. 씨앗이 점점 새싹에서 아름다운 꽃과 나무로 자라납니다!
+                </div>
+            </div>
+
+            <!-- 4단계: 정원 등록 -->
+            <div class="tutorial-card" id="tut-step-4">
+                <div class="tutorial-icon">🏡</div>
+                <div class="tutorial-title">나만의 정원을 완성해보세요</div>
+                <div class="tutorial-desc">
+                    식물이 끝까지 다 자라면 <span class="tutorial-highlight">'정원에 심기'</span> 버튼이 나타납니다.<br><br>
+                    완성한 식물을 정원에 수집하고 여러분만의 울창한 정원을 꾸며보세요!
+                </div>
+            </div>
+
+            <!-- 하단 조작 컨트롤 -->
+            <div class="tutorial-footer">
+                <button class="tut-btn tut-btn-prev" id="tut-btn-prev" onclick="moveTutorial(-1)" style="visibility: hidden;">이전</button>
+                <div class="tutorial-dots">
+                    <div class="dot active" id="dot-1"></div>
+                    <div class="dot" id="dot-2"></div>
+                    <div class="dot" id="dot-3"></div>
+                    <div class="dot" id="dot-4"></div>
+                </div>
+                <button class="tut-btn tut-btn-next" id="tut-btn-next" onclick="moveTutorial(1)">다음</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container active" id="page-workspace">
+        <div class="left-col">
+            <div class="panel timer-panel" id="timer-panel">
+                <div class="panel-title" style="width: 100%;">
+                    <div class="panel-title-text"><i class="fa-solid fa-clock"></i> 타이머</div>
+                    <button class="btn-focus" onclick="toggleFocusMode()"><i class="fa-solid fa-expand"></i> 집중모드</button>
+                </div>
+                <div class="mode-switch">
+                    <button class="mode-btn active" id="mode-timer" onclick="switchMode('timer')">⏳ 타이머</button>
+                    <button class="mode-btn" id="mode-stopwatch" onclick="switchMode('stopwatch')">⏱️ 스톱워치</button>
+                </div>
+                <div class="sprout-status">
+                    <span id="sprout-icon">🌱</span>
+                    <span id="sprout-text">시작 버튼을 눌러 집중의 씨앗을 심으세요.</span>
+                </div>
+                <div class="time-options" id="time-options">
+                    <button class="btn-time" onclick="setTimer(10)">10분</button>
+                    <button class="btn-time" onclick="setTimer(30)">30분</button>
+                    <button class="btn-time" onclick="setTimer(60)">1시간</button>
+                    <button class="btn-time" onclick="setTimer(120)">2시간</button>
+                </div>
+                <div class="candle-wrapper">
+                    <div class="candle-glow" id="candle-glow"></div>
+                    <div class="candle" id="candle-body">
+                        <div class="wick"></div>
+                        <div class="flame" id="candle-flame"></div>
+                    </div>
+                </div>
+                <div class="huge-time" id="time-display">30:00</div>
+                <div class="btn-set">
+                    <button class="btn btn-main" id="btn-start" onclick="toggleTimer()">시작</button>
+                    <button class="btn btn-sub" onclick="resetTimer()"><i class="fa-solid fa-rotate-right"></i> 초기화</button>
+                </div>
+            </div>
+            
+            <button class="exit-focus-btn" onclick="toggleFocusMode()"><i class="fa-solid fa-compress"></i> 종료</button>
+            <div class="focus-audio-bar" id="focus-audio-bar">
+                <button class="fa-btn" onclick="toggleAudio('nature')" data-track="nature">🍃</button>
+                <button class="fa-btn" onclick="toggleAudio('rain')" data-track="rain">🌧️</button>
+                <button class="fa-btn" onclick="toggleAudio('fire')" data-track="fire">🔥</button>
+                <input type="range" class="mini-vol" id="mini-vol-slider" min="0" max="1" step="0.1" value="0.5" oninput="changeVolume(this.value)">
+            </div>
+
+            <div class="panel">
+                <div class="panel-title"><i class="fa-solid fa-headphones"></i> 집중의 소리</div>
+                <div class="turntable-deck" id="turntable-deck">
+                    <div class="vinyl" id="vinyl"><div class="vinyl-label" id="vinyl-label"><div class="vinyl-hole"></div></div></div>
+                    <div class="tonearm" id="tonearm"></div>
+                </div>
+                <div class="audio-controls">
+                    <button class="audio-btn" onclick="toggleAudio('nature')" data-track="nature">🍃 숲속</button>
+                    <button class="audio-btn" onclick="toggleAudio('rain')" data-track="rain">🌧️ 빗소리</button>
+                    <button class="audio-btn" onclick="toggleAudio('fire')" data-track="fire">🔥 모닥불</button>
+                </div>
+                <input type="range" class="volume-slider" id="vol-slider" min="0" max="1" step="0.1" value="0.5" oninput="changeVolume(this.value)">
+            </div>
+        </div>
+
+        <div class="right-col">
+            <div class="panel">
+                <div class="panel-title"><i class="fa-solid fa-list-check"></i> 오늘의 목표 (최대 7개)</div>
+                <input type="text" class="todo-input" id="todo-input" placeholder="무엇을 완료할 예정인가요? (Enter)" onkeypress="addTodo(event)">
+                <ul class="todo-list" id="todo-list"></ul>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title"><i class="fa-solid fa-trash-can"></i> 잡생각 쓰레기통</div>
+                <textarea class="brain-dump-textarea" id="brain-dump" placeholder="집중을 방해하는 불안감, 딴생각을 적고 태워버리세요."></textarea>
+                <button class="btn-burn" onclick="burnThoughts()"><i class="fa-solid fa-fire-flame-curved"></i> 태우기</button>
+            </div>
+
+            <div class="stats-box">
+                <div>
+                    <div class="stat-title">총 집중 시간</div>
+                    <div class="stat-value" id="stat-time">0분</div>
+                </div>
+                <div>
+                    <div class="stat-title">완료한 세션</div>
+                    <div class="stat-value" id="stat-cycle">0회</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="page-plant">
+        <div class="garden-header">
+            <h2>나의 화분 🌱</h2>
+            <button class="btn-to-garden" onclick="navTo('garden-view')">정원 보러가기 🏡</button>
+        </div>
+
+        <div class="plant-area-container" id="main-plant-container">
+            <div class="main-plant-area">
+                <div class="big-plant" id="big-plant">🌱</div>
+            </div>
+            
+            <div class="plant-info">
+                <div id="plant-name-display" style="font-size: 1.2rem;">새싹</div>
+                <div style="font-size: 0.9rem; color: #666; margin-top: 6px;" id="plant-exp-text">경험치: 0 / 30</div>
+                <div class="exp-bar-bg"><div class="exp-bar-fill" id="plant-exp-bar"></div></div>
+            </div>
+
+            <div class="inventory-panel" id="action-panel">
+                <div class="inv-buttons-row">
+                    <button class="inv-btn" id="btn-cloud" onclick="useItem('cloud')">
+                        🌧️ 비구름 <span class="badge" id="badge-cloud">0</span>
+                    </button>
+                    <button class="inv-btn" id="btn-water" onclick="useItem('water')">
+                        🚿 물뿌리개 <span class="badge" id="badge-water">0</span>
+                    </button>
+                </div>
+                <p style="margin-top: 1rem; color: #555; font-weight: bold; font-size: 0.9rem;">💡 워크스페이스에서 타이머를 달성해 아이템을 얻으세요!</p>
+            </div>
+
+            <button class="btn-harvest" id="btn-harvest" onclick="harvestPlant()">완성! 정원에 심기 🏡</button>
+        </div>
+
+        <!-- 씨앗 선택 모달 -->
+        <div id="seed-selection-modal" class="modal">
+            <div class="modal-content panel">
+                <h3>🌱 어떤 씨앗을 심을까요?</h3>
+                <p style="color: var(--text-sub); margin-bottom: 20px;">각 식물마다 성장 속도와 모습이 다릅니다.</p>
+                <div class="plant-type-options">
+                    <div class="seed-card" onclick="selectSeed('DAISY')">
+                        <div class="seed-emoji">🌼</div>
+                        <div class="seed-name">데이지 씨앗</div>
+                        <div style="font-size: 0.8rem; color: #888;">빠른 성장 (3단계)</div>
+                    </div>
+                    <div class="seed-card" onclick="selectSeed('ROSE')">
+                        <div class="seed-emoji">🌹</div>
+                        <div class="seed-name">장미 씨앗</div>
+                        <div style="font-size: 0.8rem; color: #888;">보통 성장 (4단계)</div>
+                    </div>
+                    <div class="seed-card" onclick="selectSeed('TREE')">
+                        <div class="seed-emoji">🌳</div>
+                        <div class="seed-name">나무 씨앗</div>
+                        <div style="font-size: 0.8rem; color: #888;">느린 성장 (5단계)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="page-garden-view">
+        <div class="garden-header">
+            <h2>나의 정원 🏡</h2>
+            <button class="btn-to-garden" style="background: var(--text-main);" onclick="navTo('plant')">식물 키우러 가기 🌱</button>
+        </div>
+        <div class="garden-container panel">
+            <div class="sky"></div>
+            <div class="fence"></div>
+            <div class="ground" id="completed-plants-grid"></div>
+        </div>
+    </div>
+
+    <!-- 1. 생명과학적 원리 페이지 (그리드 카드 레이아웃) -->
+    <div class="container" id="page-principles">
+        <div class="panel" style="width: 100%;">
+            <div class="principles-header-title">집중의 신 | 생명과학으로 보는 집중의 원리</div>
+            <div class="principles-subtext">집중의 신이 제공하는 기능들 속에 숨겨진 뇌과학 및 생리학적 메커니즘을 확인해 보세요.</div>
+            
+            <div class="principles-grid">
+                <!-- 카드 1 -->
+                <div class="principle-card">
+                    <div class="principle-card-header">
+                        <div class="principle-icon-box"><i class="fa-solid fa-brain"></i></div>
+                        <div>
+                            <div class="principle-title-text">뇌 보상 회로와 동기 부여<br><span style="font-size: 0.85rem; font-weight: 500; color: var(--text-sub);">(Reward Circuit & Dopamine)</span></div>
+                            <div class="connected-badge"><i class="fa-solid fa-link"></i> 식물 성장 모션 & 타이머 보상</div>
+                        </div>
+                    </div>
+                    <div class="principle-details">
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 도파민 분비 촉진</div>
+                            목표 시간(10분, 30분 등)을 완료했을 때 얻는 아이템과 visual 성장 피드백은 뇌의 <strong>복좌핵(Nucleus Accumbens)</strong> 및 <strong>선상체(Striatum)</strong> 중심의 보상 회로를 자극합니다.
+                        </div>
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 행동 강화</div>
+                            도파민은 단순한 쾌감을 넘어 '동기 부여'를 지속하는 신경전달물질입니다. 점진적 성장 단계는 보상 예측 오차(Reward Prediction Error)를 유도하여 다음 집중 세션을 자발적으로 시작하도록 뇌 회로를 강화합니다.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 카드 2 -->
+                <div class="principle-card">
+                    <div class="principle-card-header">
+                        <div class="principle-icon-box"><i class="fa-solid fa-hourglass-half"></i></div>
+                        <div>
+                            <div class="principle-title-text">전두엽 인지 과부하 완화<br><span style="font-size: 0.85rem; font-weight: 500; color: var(--text-sub);">(Prefrontal Cortex & Cognitive Load)</span></div>
+                            <div class="connected-badge"><i class="fa-solid fa-link"></i> 촛불 연소 타이머 & 시각적 시간 흐름</div>
+                        </div>
+                    </div>
+                    <div class="principle-details">
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 작업 기억 자원 절약</div>
+                            디지털 숫자가 계속 바뀌는 시계는 뇌의 <strong>전두엽(Prefrontal Cortex)</strong>에 인지적 과부하를 초래할 수 있습니다.
+                        </div>
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 직관적 몰입 유도</div>
+                            실시간으로 길이가 줄어드는 촛불 라인 그래픽은 작업 기억(Working Memory)을 추가로 소모하지 않고도 시간의 경과를 직관적으로 파악하게 해 주어, 전두엽이 오직 '현재 작업'에만 집중하도록 도와줍니다.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 카드 3 -->
+                <div class="principle-card">
+                    <div class="principle-card-header">
+                        <div class="principle-icon-box"><i class="fa-solid fa-wave-square"></i></div>
+                        <div>
+                            <div class="principle-title-text">자율신경계 조절 및 뇌파 안정<br><span style="font-size: 0.85rem; font-weight: 500; color: var(--text-sub);">(Autonomic Nervous System & Brainwaves)</span></div>
+                            <div class="connected-badge"><i class="fa-solid fa-link"></i> 핑크/브라운 노이즈 (백색소음)</div>
+                        </div>
+                    </div>
+                    <div class="principle-details">
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 부교감신경 활성화</div>
+                            일정하고 예측 가능한 자연의 주파수 소음은 교감신경의 과도한 흥분을 줄이고 <strong>부교감신경계(Parasympathetic Nervous System)</strong>를 활성화하여 심박수와 호흡을 안정시킵니다.
+                        </div>
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 알파파(&alpha;-wave) 유도</div>
+                            청각 자극의 안정을 통해 편안한 집중 상태에서 나타나는 뇌파인 알파파 생성을 유도하여 스트레스 없이 긴 몰입 상태를 유지하도록 돕습니다.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 카드 4 -->
+                <div class="principle-card">
+                    <div class="principle-card-header">
+                        <div class="principle-icon-box"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div>
+                            <div class="principle-title-text">편도체 진정을 통한 불안 해소<br><span style="font-size: 0.85rem; font-weight: 500; color: var(--text-sub);">(Amygdala & Externalization)</span></div>
+                            <div class="connected-badge"><i class="fa-solid fa-link"></i> 잡생각 쓰레기통 & 시각적 소멸 효과</div>
+                        </div>
+                    </div>
+                    <div class="principle-details">
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 불안 자극 차단</div>
+                            집중을 방해하는 잡생각이나 회피 욕구는 <strong>편도체(Amygdala)</strong>의 경계 반응에서 비롯됩니다.
+                        </div>
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 인지적 재구성</div>
+                            머릿속의 불안을 텍스트로 외부화(Externalization)한 뒤 visual 소멸 효과(타서 사라짐)를 주는 것은, 배외측 전두엽(dlPFC)이 해당 상황을 '상황 종료'로 인지하게 하여 편도체의 과활성화를 진정시키고 마음의 여유를 되찾게 만듭니다.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 뇌 피로도 & 집중 유형 테스트 (개편안) -->
+    <div class="container" id="page-test">
+        <div class="panel" style="width: 100%;">
+            <div id="test-questions">
+                <div class="panel-title"><i class="fa-solid fa-clipboard-list"></i> 나의 뇌 피로도 & 집중 유형 테스트</div>
+                <p style="color: var(--text-sub); margin-bottom: 1.5rem; font-size: 0.95rem;">최근 1주일간 본인의 모습에 해당하는 동그라미를 선택해 주세요. (5단계: 매우 그렇다 ~ 전혀 아니다)</p>
+                
+                <!-- 12문항 MBTI 방식 리커트 척도 설문 -->
+                <form id="mbti-test-form">
+                    <!-- 섹션 1 -->
+                    <div class="test-sec">
+                        <div class="test-sec-title"><i class="fa-solid fa-mobile-screen-button"></i> [섹션 1: 디지털 자극 반응성]</div>
+                        
+                        <div class="mbti-q-card">
+                            <div class="mbti-q-text">1. 공부나 작업을 시작하기 전, 나도 모르게 스마트폰부터 확인한다.</div>
+                            <div class="likert-scale-box">
+                                <label class="likert-opt size-5"><input type="radio" name="q1" value="5" required></label>
+                                <label class="likert-opt size-4"><input type="radio" name="q1" value="4"></label>
+                                <label class="likert-opt size-3"><input type="radio" name="q1" value="3"></label>
+                                <label class="likert-opt size-2"><input type="radio" name="q1" value="2"></label>
+                                <label class="likert-opt size-1"><input type="radio" name="q1" value="1"></label>
+                            </div>
+                            <div class="likert-label-row">
+                                <span>매우 그렇다</span><span>그렇다</span><span>보통</span><span>아니다</span><span>전혀 아니다</span>
+                            </div>
+                        </div>
+
+                        <div class="mbti-q-card">
+                            <div class="mbti-q-text">2. 숏폼 영상이나 SNS를 보다 보면 예정보다 훨씬 긴 시간을 보낸다.</div>
+                            <div class="likert-scale-box">
+                                <label class="likert-opt size-5"><input type="radio" name="q2" value="5" required></label>
+                                <label class="likert-opt size-4"><input type="radio" name="q2" value="4"></label>
+                                <label class="likert-opt size-3"><input type="radio" name="q2" value="3"></label>
+                                <label class="likert-opt size-2"><input type="radio" name="q2" value="2"></label>
+                                <label class="likert-opt size-1"><input type="radio" name="q2" value="1"></label>
+                            </div>
+                            <div class="likert-label-row">
+                                <span>매우 그렇다</span><span>그렇다</span><span>보통</span><span>아니다</span><span>전혀 아니다</span>
+                            </div>
+                        </div>
+
+                        <div class="mbti-q-card">
+                            <div class="mbti-q-text">3. 특별한 알림이 오지 않아도 스마트폰 화면을 자주 켜본다.</div>
+                            <div class="likert-scale-box">
+                                <label class="likert-opt size-5"><input type="radio" name="q3" value="5" required></label>
+                                <label class="likert-opt size-4"><input type="radio" name="q3" value="4"></label>
+                                <label class="likert-opt size-3"><input type="radio" name="q3" value="3"></label>
+                                <label class="likert-opt size-2"><input type="radio" name="q3" value="2"></label>
+                                <label class="likert-opt size-1"><input type="radio" name="q3" value="1"></label>
+                            </div>
+                            <div class="likert-label-row">
+                                <span>매우 그렇다</span><span>그렇다</span><span>보통</span><span>아니다</span><span>전혀 아니다</span>
+                            </div>
+                        </div>
+
+                        <div class="mbti-q-card">
+                            <div class="mbti-q-text">4. 자극적이거나 빠른 호흡의 콘텐츠가 아니면 쉽게 지루함을 느낀다.</div>
+                            <div class="likert-scale-box">
+                                <label class="likert-opt size-5"><input type="radio" name="q4" value="5" required></label>
+                                <label class="likert-opt size-4"><input type="radio" name="q4" value="4"></label>
+                                <label class="likert-opt size-3"><input type="radio" name="q4" value="3"></label>
+                                <label class="likert-opt size-2"><input type="radio" name="q4" value="2"></label>
+                                <label class="likert-opt size-1"><input type="radio" name="q4" value="1"></label>
+                            </div>
+                            <div class="likert-label-row">
+                                <span>매우 그렇다</span><span>그렇다</span><span>보통</span><span>아니다</span><span>전혀 아니다</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 섹션 2 -->
+                    <div class="test-sec">
+                        <div class="test-sec-title"><i class="fa-solid fa-battery-quarter"></i> [섹션 2: 집중 지속력 및 뇌 피로도]</div>
+                        
+                        <div class="mbti-q-card">
+                            <div class="mbti-q-text">5. 10분 이상 긴 글을 읽거나 한 가지 작업에 진득하게 머물기 힘들다.</div>
+                            <div class="likert-scale-box">
+                                <label class="likert-opt size-5"><input type="radio" name="q5" value="5" required></label>
+                                <label class="likert-opt size-4"><input type="radio" name="q5" value="4"></label>
+                                <label class="likert-opt size-3"><input type="radio" name="q5" value="3"></label>
+                                <label class="likert-opt size-2"><input type="radio" name="q5" value="2"></label>
+                                <label class="likert-opt size-1"><input type="radio" name="q5" value="1"></label>
+                            </div>
+                            <div class="likert-label-row">
+                                <span>매우 그렇다</span><span>그렇다</span><span>보통</span><span>아니다</span><span>전혀 아니다</span>
+                            </div>
+                        </div>
+
+                        <div class="mbti-q-card">
+                            <div class="mbti-q-text">6. 한 번 집중이 깨지면 다시 원래 작업으로 돌아오기까지 시간이 오래 걸린다.</div>
+                            <div class="likert-scale-box">
+                                <label class="likert-opt size-5"><input type="radio" name="q6" value="5" required></label>
+                                <label class="likert-opt size-4"><input type="radio" name="q6" value="4"></label>
+                                <label class="likert-opt size-3"><input type="radio" name="q6" value="3"></label>
+                                <label class="likert-opt size-2"><input type="radio" name="q6" value="2"></label>
+                                <label class="likert-opt size-1"><input type="radio" name="q6" value="1"></label>
+                            </div>
+                            <div class="likert-label-row">
+                                <span>매우 그렇다</span><span>그렇다</span><span>보통</span><span>아니다</span><span>전혀 아니다</span>
+                            </div>
+                        </div>
+
+                        <div class="mbti-q-card">
+                            <div class="mbti-q-text">7. 책상에 앉아 있어도 머릿속이 안개 낀 것처럼 멍한 느낌이 자주 든다.</div>
+                            <div class="likert-scale-box">
+                                <label class="likert-opt size-5"><input type="radio" name="q7" value="5" required></label>
+                                <label class="likert-opt size-4"><input type="radio" name="q7" value="4"></label>
+                                <label class="likert-opt size-3"><input type="radio" name="q7" value="3"></label>
+                                <label class="likert-opt size-2"><input type="radio" name="q7" value="2"></label>
+                                <label class="likert-opt size-1"><input type="radio" name="q7" value="1"></label>
+                            </div>
+                            <div class="likert-label-row">
+                                <span>매우 그렇다</span><span>그렇다</span><span>보통</span><span>아니다</span><span>전혀 아니다</span>
+                            </div>
+                        </div>
+
+                        <div class="mbti-q-card">
+                            <div class="mbti-q-text">8. 하루를 마치고 나면 인지적인 피로감이나 뇌의 과부하가 크게 느껴진다.</div>
+                            <div class="likert-scale-box">
+                                <label class="likert-opt size-5"><input type="radio" name="q8" value="5" required></label>
+                                <label class="likert-opt size-4"><input type="radio" name="q8" value="4"></label>
+                                <label class="likert-opt size-3"><input type="radio" name="q8" value="3"></label>
+                                <label class="likert-opt size-2"><input type="radio" name="q8" value="2"></label>
+                                <label class="likert-opt size-1"><input type="radio" name="q8" value="1"></label>
+                            </div>
+                            <div class="likert-label-row">
+                                <span>매우 그렇다</span><span>그렇다</span><span>보통</span><span>아니다</span><span>전혀 아니다</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 섹션 3 -->
+                    <div class="test-sec">
+                        <div class="test-sec-title"><i class="fa-solid fa-cloud-bolt"></i> [섹션 3: 잡생각 및 불안 반응]</div>
+                        
+                        <div class="mbti-q-card">
+                            <div class="mbti-q-text">9. 집중하려고 마음먹으면 오히려 다른 걱정이나 딴생각이 끊이지 않는다.</div>
+                            <div class="likert-scale-box">
+                                <label class="likert-opt size-5"><input type="radio" name="q9" value="5" required></label>
+                                <label class="likert-opt size-4"><input type="radio" name="q9" value="4"></label>
+                                <label class="likert-opt size-3"><input type="radio" name="q9" value="3"></label>
+                                <label class="likert-opt size-2"><input type="radio" name="q9" value="2"></label>
+                                <label class="likert-opt size-1"><input type="radio" name="q9" value="1"></label>
+                            </div>
+                            <div class="likert-label-row">
+                                <span>매우 그렇다</span><span>그렇다</span><span>보통</span><span>아니다</span><span>전혀 아니다</span>
+                            </div>
+                        </div>
+
+                        <div class="mbti-q-card">
+                            <div class="mbti-q-text">10. 해야 할 일이 쌓여 있을 때 시작하기보다 회피하고 싶은 마음이 먼저 든다.</div>
+                            <div class="likert-scale-box">
+                                <label class="likert-opt size-5"><input type="radio" name="q10" value="5" required></label>
+                                <label class="likert-opt size-4"><input type="radio" name="q10" value="4"></label>
+                                <label class="likert-opt size-3"><input type="radio" name="q10" value="3"></label>
+                                <label class="likert-opt size-2"><input type="radio" name="q10" value="2"></label>
+                                <label class="likert-opt size-1"><input type="radio" name="q10" value="1"></label>
+                            </div>
+                            <div class="likert-label-row">
+                                <span>매우 그렇다</span><span>그렇다</span><span>보통</span><span>아니다</span><span>전혀 아니다</span>
+                            </div>
+                        </div>
+
+                        <div class="mbti-q-card">
+                            <div class="mbti-q-text">11. 아무것도 하지 않고 가만히 쉬는 시간에 불안함이나 조급함을 느낀다.</div>
+                            <div class="likert-scale-box">
+                                <label class="likert-opt size-5"><input type="radio" name="q11" value="5" required></label>
+                                <label class="likert-opt size-4"><input type="radio" name="q11" value="4"></label>
+                                <label class="likert-opt size-3"><input type="radio" name="q11" value="3"></label>
+                                <label class="likert-opt size-2"><input type="radio" name="q11" value="2"></label>
+                                <label class="likert-opt size-1"><input type="radio" name="q11" value="1"></label>
+                            </div>
+                            <div class="likert-label-row">
+                                <span>매우 그렇다</span><span>그렇다</span><span>보통</span><span>아니다</span><span>전혀 아니다</span>
+                            </div>
+                        </div>
+
+                        <div class="mbti-q-card">
+                            <div class="mbti-q-text">12. 작업이나 공부를 마쳐도 성취감보다는 피곤함이 더 크다.</div>
+                            <div class="likert-scale-box">
+                                <label class="likert-opt size-5"><input type="radio" name="q12" value="5" required></label>
+                                <label class="likert-opt size-4"><input type="radio" name="q12" value="4"></label>
+                                <label class="likert-opt size-3"><input type="radio" name="q12" value="3"></label>
+                                <label class="likert-opt size-2"><input type="radio" name="q12" value="2"></label>
+                                <label class="likert-opt size-1"><input type="radio" name="q12" value="1"></label>
+                            </div>
+                            <div class="likert-label-row">
+                                <span>매우 그렇다</span><span>그렇다</span><span>보통</span><span>아니다</span><span>전혀 아니다</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-main" style="width: 100%; padding: 1.2rem; font-size: 1.1rem;" onclick="submitTest()">진단 결과 확인하기</button>
+                </form>
+            </div>
+
+            <!-- 결과 카드 영역 -->
+            <div id="test-result-container">
+                <div id="test-result-content"></div>
+                <button class="retry-btn" onclick="retryTest()"><i class="fa-solid fa-rotate-right"></i> 다시 테스트하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 집중 팁 페이지 (생명과학 원리 탭과 동일한 고급 카드로 개편) -->
+    <div class="container" id="page-tips">
+        <div class="panel" style="width: 100%;">
+            <div class="principles-header-title">집중의 신 | 몰입 효율을 200% 올리는 실전 집중 팁 💡</div>
+            <div class="principles-subtext">뇌과학적 원리를 일상 공부와 작업에 즉각 적용할 수 있도록 설계된 실전 행동 지침입니다.</div>
+            
+            <div class="principles-grid">
+                <!-- 팁 카드 1 -->
+                <div class="principle-card">
+                    <div class="principle-card-header">
+                        <div class="principle-icon-box"><i class="fa-solid fa-stopwatch"></i></div>
+                        <div>
+                            <div class="principle-title-text">마찰력 줄이기: 5분 스타트 법칙<br><span style="font-size: 0.85rem; font-weight: 500; color: var(--text-sub);">(Activation Energy Reduction)</span></div>
+                            <div class="connected-badge"><i class="fa-solid fa-clock"></i> 타이머 10분 설정 활용</div>
+                        </div>
+                    </div>
+                    <div class="principle-details">
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 최소 시작 단위 설정</div>
+                            뇌는 거대한 목표 앞에서 거부감을 느낍니다. "딱 5분만 하고 그만두자"는 가벼운 마음으로 타이머를 누르면 시작 활성화 에너지를 비약적으로 낮출 수 있습니다.
+                        </div>
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 작업 관성 활용</div>
+                            일단 작업을 시작하면 뇌의 측좌핵이 활성화되며 '계속하려는 관성(Work Inertia)'이 형성되어 자연스럽게 장시간 몰입으로 이어집니다.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 팁 카드 2 -->
+                <div class="principle-card">
+                    <div class="principle-card-header">
+                        <div class="principle-icon-box"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                        <div>
+                            <div class="principle-title-text">디지털 자극 차단: 시야 밖 격리<br><span style="font-size: 0.85rem; font-weight: 500; color: var(--text-sub);">(Visual Distraction Shielding)</span></div>
+                            <div class="connected-badge"><i class="fa-solid fa-expand"></i> 전체화면 집중 모드 활용</div>
+                        </div>
+                    </div>
+                    <div class="principle-details">
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 물리적 거리 두기</div>
+                            스마트폰이 책상 위 시야에 보이기만 해도 뇌는 알림을 억제하는 데 무의식적 인지 자원(Cognitive Capacity)을 지속적으로 소모합니다. 폰은 반드시 서랍이나 가방 속에 두세요.
+                        </div>
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 시각적 전용 환경 구축</div>
+                            앱의 <strong>[집중모드]</strong>를 켜서 촛불 화면만 띄워두면 딴짓 유혹을 차단하고 작업 전용 시각 환경을 즉시 완성할 수 있습니다.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 팁 카드 3 -->
+                <div class="principle-card">
+                    <div class="principle-card-header">
+                        <div class="principle-icon-box"><i class="fa-solid fa-dumpster-fire"></i></div>
+                        <div>
+                            <div class="principle-title-text">불안 및 딴생각 즉시 외부화<br><span style="font-size: 0.85rem; font-weight: 500; color: var(--text-sub);">(Brain Dump & Externalization)</span></div>
+                            <div class="connected-badge"><i class="fa-solid fa-fire-flame-curved"></i> 잡생각 쓰레기통 활용</div>
+                        </div>
+                    </div>
+                    <div class="principle-details">
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 작업 기억 방출</div>
+                            공부 도중 갑자기 떠오르는 걱정이나 사소한 할 일은 머릿속에 품고 있지 말고 <strong>[잡생각 쓰레기통]</strong>에 즉시 글로 적어버리세요.
+                        </div>
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 시각적 소멸 효과</div>
+                            글자를 적고 <strong>[태우기]</strong> 버튼을 눌러 소멸시키는 행동은 뇌에 "이 문제는 정리되었다"는 신호를 전달하여 편도체의 불안을 진정시킵니다.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 팁 카드 4 -->
+                <div class="principle-card">
+                    <div class="principle-card-header">
+                        <div class="principle-icon-box"><i class="fa-solid fa-headphones"></i></div>
+                        <div>
+                            <div class="principle-title-text">청각적 앵커링: 뇌파 유도 사운드<br><span style="font-size: 0.85rem; font-weight: 500; color: var(--text-sub);">(Auditory Noise Masking)</span></div>
+                            <div class="connected-badge"><i class="fa-solid fa-compact-disc"></i> 집중의 소리 (LP 턴테이블)</div>
+                        </div>
+                    </div>
+                    <div class="principle-details">
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 소음 상쇄 마스킹</div>
+                            주변의 돌발적인 소음이나 억양은 인지 집중을 방해합니다. 숲속, 빗소리, 모닥불 소리는 불규칙한 소음을 차단하여 청각적 안정을 선사합니다.
+                        </div>
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 몰입 스위치 연동</div>
+                            공부를 시작할 때만 특정 소리를 틀어두는 조건 형성(Conditioning)을 거치면, 소리를 듣는 것만으로도 뇌가 즉시 집중 모드로 전환됩니다.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 팁 카드 5 -->
+                <div class="principle-card">
+                    <div class="principle-card-header">
+                        <div class="principle-icon-box"><i class="fa-solid fa-seedling"></i></div>
+                        <div>
+                            <div class="principle-title-text">게임화(Gamification) 보상 활용<br><span style="font-size: 0.85rem; font-weight: 500; color: var(--text-sub);">(Dopamine Feedback Loop)</span></div>
+                            <div class="connected-badge"><i class="fa-solid fa-plant-wilt"></i> 식물 키우기 & 정원 수집</div>
+                        </div>
+                    </div>
+                    <div class="principle-details">
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 즉각적 보상 메커니즘</div>
+                            공부는 결과가 천천히 나오기 때문에 뇌가 쉽게 피로해집니다. 집중 세션 완료 후 얻는 아이템으로 식물을 키우며 즉각적인 성취 감각을 유지하세요.
+                        </div>
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 시각적 성취 축적</div>
+                            다 자란 식물을 <strong>[나의 정원]</strong>에 하나씩 수집해 나가는 시각적 기록은 매일 지속해서 공부하게 만드는 강력한 도파민 동력이 됩니다.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 팁 카드 6 -->
+                <div class="principle-card">
+                    <div class="principle-card-header">
+                        <div class="principle-icon-box"><i class="fa-solid fa-battery-half"></i></div>
+                        <div>
+                            <div class="principle-title-text">전두엽 회복을 위한 스마트 휴식<br><span style="font-size: 0.85rem; font-weight: 500; color: var(--text-sub);">(Ultradian Rhythm & Recovery)</span></div>
+                            <div class="connected-badge"><i class="fa-solid fa-bed"></i> 뽀모도로 휴식 스케줄</div>
+                        </div>
+                    </div>
+                    <div class="principle-details">
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 인지 에너지 관리</div>
+                            30분~60분 집중 후 짧은 휴식을 반드시 가지세요. 휴식 없는 장시간 작업은 전두엽 인지 자원을 고갈시켜 후반부 효율을 급격히 떨어뜨립니다.
+                        </div>
+                        <div>
+                            <div class="principle-item-title"><i class="fa-solid fa-circle-dot" style="font-size:0.5rem; color:var(--accent);"></i> 진정한 휴식 법칙</div>
+                            쉬는 시간에 SNS나 숏폼을 보면 뇌가 쉴 수 없습니다. 창밖 먼 곳을 바라보거나 스트레칭을 통해 새로운 정보 입력을 완전히 멈춰주세요.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="admin-trigger" onclick="checkAdminPassword()"><i class="fa-solid fa-wrench"></i></button>
+    <div class="admin-panel-overlay" id="admin-panel">
+        <h3><i class="fa-solid fa-user-secret"></i> 관리자 도구 <button class="close-admin" onclick="toggleAdminPanel()"><i class="fa-solid fa-xmark"></i></button></h3>
+        <div class="admin-grid">
+            <button class="admin-btn admin-full-btn" onclick="adminFinishTimerImmediate()"><i class="fa-solid fa-hourglass-end"></i> 타이머 즉시 완료 시키기 (1초 남김)</button>
+            <button class="admin-btn admin-full-btn" onclick="adminMaxOutExp()"><i class="fa-solid fa-bolt-lightning"></i> 현재 식물 확 그냥 다 키우기 (MAX EXP)</button>
+            <button class="admin-btn" onclick="adminAddItems()"><i class="fa-solid fa-box-open"></i> 아이템 +50개</button>
+            <button class="admin-btn" onclick="adminAddStats()"><i class="fa-solid fa-chart-simple"></i> 통계 수치 반영</button>
+            <button class="admin-btn admin-full-btn" onclick="adminAddCompletedPlant()"><i class="fa-solid fa-seedling"></i> 정원 강제 완성 (무작위 배치)</button>
+            <button class="admin-btn admin-full-btn" onclick="adminResetData()" style="color: #dc3545; border-color: #dc3545;"><i class="fa-solid fa-skull"></i> 모든 데이터 초기화 (Reset)</button>
+        </div>
+    </div>
+
+    <script>
+        // 온보딩(튜토리얼) 로직
+        let currentTutStep = 1;
+        const totalTutSteps = 4;
+
+        function checkFirstVisit() {
+            const hasSeenTutorial = localStorage.getItem('focusApp_seenTutorial');
+            if (!hasSeenTutorial) {
+                openTutorial();
+            }
+        }
+
+        function openTutorial() {
+            currentTutStep = 1;
+            updateTutorialUI();
+            document.getElementById('tutorial-modal').style.display = 'block';
+        }
+
+        function closeTutorial() {
+            document.getElementById('tutorial-modal').style.display = 'none';
+            localStorage.setItem('focusApp_seenTutorial', 'true');
+        }
+
+        function moveTutorial(dir) {
+            currentTutStep += dir;
+            if (currentTutStep > totalTutSteps) {
+                closeTutorial();
+                return;
+            }
+            if (currentTutStep < 1) currentTutStep = 1;
+            updateTutorialUI();
+        }
+
+        function updateTutorialUI() {
+            for (let i = 1; i <= totalTutSteps; i++) {
+                const card = document.getElementById(`tut-step-${i}`);
+                const dot = document.getElementById(`dot-${i}`);
+                if (i === currentTutStep) {
+                    card.classList.add('active');
+                    dot.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                    dot.classList.remove('active');
+                }
+            }
+            
+            document.getElementById('tut-btn-prev').style.visibility = currentTutStep === 1 ? 'hidden' : 'visible';
+            document.getElementById('tut-btn-next').innerText = currentTutStep === totalTutSteps ? '시작하기!' : '다음';
+        }
+
+        // 네비게이션
+        function navTo(pageId) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+            
+            const targetBtn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(`navTo('${pageId}')`));
+            if(targetBtn) targetBtn.classList.add('active');
+            
+            document.getElementById('page-' + pageId).classList.add('active');
+            
+            if(pageId === 'plant') checkSeedSelection(); 
+            if(pageId === 'garden-view') renderGardenView(); 
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement; html.setAttribute('data-theme', html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+        }
+
+        // 집중 모드
+        function toggleFocusMode() {
+            const timerPanel = document.getElementById('timer-panel');
+            timerPanel.classList.toggle('focus-mode');
+            document.body.classList.toggle('no-scroll');
+        }
+
+        // 로컬스토리지 (V16)
+        let appData = JSON.parse(localStorage.getItem('focusApp_v16')) || { 
+            todos: [], totalTime: 0, cycles: 0, 
+            inventory: { cloud: 0, water: 0 }, plantExp: 0,
+            currentPlantType: null, 
+            completedPlants: [] 
+        };
+
+        function saveData() { localStorage.setItem('focusApp_v16', JSON.stringify(appData)); updateStats(); }
+        
+        function updateStats() {
+            const m = Math.floor(appData.totalTime / 60); const h = Math.floor(m / 60);
+            document.getElementById('stat-time').innerText = h > 0 ? `${h}시간 ${m % 60}분` : `${m}분`;
+            document.getElementById('stat-cycle').innerText = `${appData.cycles}회`;
+            if(document.getElementById('page-plant').classList.contains('active')) renderGardenUI();
+        }
+
+        // 식물별 성장 단계
+        const plantStagesMap = {
+            DAISY: [
+                { req: 0, emoji: '🌱', name: '새싹' },
+                { req: 40, emoji: '🌷', name: '봉오리' },
+                { req: 100, emoji: '🌼', name: '데이지' }
+            ],
+            ROSE: [
+                { req: 0, emoji: '🌱', name: '새싹' },
+                { req: 30, emoji: '🌿', name: '잎사귀' },
+                { req: 80, emoji: '🌷', name: '봉오리' },
+                { req: 150, emoji: '🌹', name: '장미' }
+            ],
+            TREE: [
+                { req: 0, emoji: '🌱', name: '새싹' },
+                { req: 50, emoji: '🌿', name: '잎사귀' },
+                { req: 100, emoji: '🪴', name: '화분' },
+                { req: 200, emoji: '🌲', name: '묘목' },
+                { req: 350, emoji: '🌳', name: '나무' }
+            ]
+        };
+
+        function getPlantData() {
+            if(!appData.currentPlantType) return null;
+            const stages = plantStagesMap[appData.currentPlantType];
+            let current = stages[0]; 
+            let next = stages[1];
+            
+            for(let i = 0; i < stages.length; i++) {
+                if(appData.plantExp >= stages[i].req) { 
+                    current = stages[i]; 
+                    next = stages[i+1] || null; 
+                }
+            }
+            return { current, next, maxExp: stages[stages.length-1].req };
+        }
+
+        // 씨앗 선택 모달 띄우기
+        function checkSeedSelection() {
+            const seedModal = document.getElementById('seed-selection-modal');
+            const mainPlantArea = document.getElementById('main-plant-container');
+
+            if (!appData.currentPlantType) {
+                seedModal.style.display = 'block';
+                mainPlantArea.style.filter = 'blur(3px)';
+            } else {
+                seedModal.style.display = 'none';
+                mainPlantArea.style.filter = 'none';
+                renderGardenUI();
+            }
+        }
+
+        function selectSeed(type) {
+            appData.currentPlantType = type;
+            appData.plantExp = 0;
+            saveData();
+            checkSeedSelection();
+        }
+
+        function renderGardenUI() {
+            if(!appData.currentPlantType) return;
+
+            document.getElementById('badge-cloud').innerText = appData.inventory.cloud;
+            document.getElementById('badge-water').innerText = appData.inventory.water;
+            document.getElementById('btn-cloud').disabled = appData.inventory.cloud <= 0;
+            document.getElementById('btn-water').disabled = appData.inventory.water <= 0;
+
+            const pData = getPlantData();
+            const plantEl = document.getElementById('big-plant');
+            
+            if (plantEl.innerText !== pData.current.emoji) {
+                plantEl.innerText = pData.current.emoji;
+                plantEl.classList.add('level-up');
+                setTimeout(() => plantEl.classList.remove('level-up'), 1000);
+            }
+
+            const prevReq = pData.current.req; 
+            const nextReq = pData.next ? pData.next.req : pData.current.req;
+            const progress = pData.next ? ((appData.plantExp - prevReq) / (nextReq - prevReq)) * 100 : 100;
+            
+            document.getElementById('plant-name-display').innerText = pData.current.name;
+            
+            if (!pData.next) {
+                document.getElementById('plant-exp-text').innerText = `경험치: MAX (${pData.maxExp} 달성!)`;
+                document.getElementById('action-panel').style.display = 'none';
+                document.getElementById('btn-harvest').style.display = 'block';
+            } else {
+                document.getElementById('plant-exp-text').innerText = `경험치: ${appData.plantExp} / ${nextReq}`;
+                document.getElementById('action-panel').style.display = 'flex';
+                document.getElementById('btn-harvest').style.display = 'none';
+            }
+            
+            requestAnimationFrame(() => {
+                document.getElementById('plant-exp-bar').style.width = `${progress}%`;
+            });
+        }
+
+        function useItem(type) {
+            if (appData.inventory[type] <= 0) return;
+            appData.inventory[type]--;
+            const expGain = type === 'cloud' ? 10 : 20; 
+            appData.plantExp += expGain;
+            
+            const pData = getPlantData();
+            if (appData.plantExp > pData.maxExp) appData.plantExp = pData.maxExp;
+
+            const plantEl = document.getElementById('big-plant');
+            const floatingText = document.createElement('div');
+            floatingText.className = 'floating-exp';
+            floatingText.innerText = `+${expGain}`;
+            
+            const randomX = (Math.random() - 0.5) * 40;
+            floatingText.style.left = `calc(50% + ${randomX}px)`;
+            floatingText.style.bottom = '100px';
+            
+            plantEl.parentNode.appendChild(floatingText);
+            setTimeout(() => floatingText.remove(), 1000);
+
+            plantEl.style.transform = 'scale(1.1) rotate(5deg)';
+            setTimeout(() => plantEl.style.transform = '', 200);
+
+            saveData(); 
+        }
+
+        function harvestPlant() {
+            const pData = getPlantData();
+            const today = new Date().toISOString().split('T')[0];
+            
+            appData.completedPlants.push({
+                id: Date.now(),
+                type: appData.currentPlantType,
+                emoji: pData.current.emoji,
+                completedDate: today
+            });
+            
+            appData.currentPlantType = null;
+            appData.plantExp = 0;
+            saveData(); 
+            
+            alert(`축하합니다! 아름다운 ${pData.current.emoji}을(를) 정원에 심었습니다.`);
+            navTo('garden-view');
+        }
+
+        function renderGardenView() {
+            const grid = document.getElementById('completed-plants-grid');
+            grid.innerHTML = '';
+            
+            if (appData.completedPlants.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--text-sub); padding-top: 50px; font-weight: bold;">아직 다 키운 식물이 없습니다.<br><br>워크스페이스에서 목표를 달성하고<br>나만의 정원을 가꿔보세요!</p>';
+                return;
+            }
+            
+            appData.completedPlants.forEach(plant => {
+                const card = document.createElement('div');
+                card.className = 'completed-plant-card';
+                card.innerHTML = `
+                    <div class="completed-plant-emoji">${plant.emoji}</div>
+                    <div class="completed-date">${plant.completedDate}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // HTML 문자열 안전화 헬퍼
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // 체크리스트
+        function renderTodos() {
+            const list = document.getElementById('todo-list'); 
+            list.innerHTML = '';
+            const indexedTodos = appData.todos.map((todo, index) => ({ ...todo, originalIndex: index }));
+            indexedTodos.sort((a, b) => a.done - b.done);
+
+            indexedTodos.forEach((todo) => {
+                const li = document.createElement('li');
+                li.className = `todo-item ${todo.done ? 'done' : ''}`;
+                li.innerHTML = `
+                    <input type="checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTodo(${todo.originalIndex})">
+                    <span>${escapeHtml(todo.text)}</span>
+                    <button class="todo-del-btn" onclick="deleteTodo(${todo.originalIndex})"><i class="fa-solid fa-xmark"></i></button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function addTodo(e) {
+            if (e.key === 'Enter') {
+                const input = document.getElementById('todo-input');
+                const text = input.value.trim();
+                if (!text) return;
+                if (appData.todos.length >= 7) {
+                    alert('목표는 최대 7개까지만 추가할 수 있습니다.');
+                    return;
+                }
+                appData.todos.push({ text, done: false });
+                input.value = '';
+                saveData();
+                renderTodos();
+            }
+        }
+
+        function toggleTodo(index) {
+            appData.todos[index].done = !appData.todos[index].done;
+            saveData();
+            renderTodos();
+        }
+
+        function deleteTodo(index) {
+            appData.todos.splice(index, 1);
+            saveData();
+            renderTodos();
+        }
+
+        // 잡생각 쓰레기통
+        function burnThoughts() {
+            const textarea = document.getElementById('brain-dump');
+            if (!textarea.value.trim()) return;
+            textarea.classList.add('burning-text');
+            setTimeout(() => {
+                textarea.value = '';
+                textarea.classList.remove('burning-text');
+            }, 1500);
+        }
+
+        // 타이머 및 스톱워치 로직
+        let currentMode = 'timer';
+        let timerInterval = null;
+        let timeLeft = 1800; // 기본 30분
+        let totalSelectedTime = 1800;
+        let stopwatchTime = 0;
+        let isRunning = false;
+
+        function switchMode(mode) {
+            if (isRunning) {
+                alert('타이머 또는 스톱워치가 작동 중일 때는 모드를 변경할 수 없습니다.');
+                return;
+            }
+            currentMode = mode;
+            document.getElementById('mode-timer').classList.toggle('active', mode === 'timer');
+            document.getElementById('mode-stopwatch').classList.toggle('active', mode === 'stopwatch');
+            
+            const timeOptions = document.getElementById('time-options');
+            if (mode === 'stopwatch') {
+                timeOptions.style.display = 'none';
+                stopwatchTime = 0;
+                updateTimerDisplay(0);
+                document.getElementById('sprout-text').innerText = '스톱워치를 시작해 집중 시간을 기록하세요.';
+            } else {
+                timeOptions.style.display = 'flex';
+                timeLeft = totalSelectedTime;
+                updateTimerDisplay(timeLeft);
+                document.getElementById('sprout-text').innerText = '시작 버튼을 눌러 집중의 씨앗을 심으세요.';
+            }
+        }
+
+        function setTimer(minutes) {
+            if (isRunning) return;
+            totalSelectedTime = minutes * 60;
+            timeLeft = totalSelectedTime;
+            updateTimerDisplay(timeLeft);
+        }
+
+        function updateTimerDisplay(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            const formatted = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            document.getElementById('time-display').innerText = formatted;
+
+            const candleBody = document.getElementById('candle-body');
+            if (currentMode === 'timer' && totalSelectedTime > 0) {
+                const ratio = seconds / totalSelectedTime;
+                candleBody.style.height = `${Math.max(10, ratio * 100)}%`;
+            } else {
+                candleBody.style.height = '100%';
+            }
+        }
+
+        function toggleTimer() {
+            const startBtn = document.getElementById('btn-start');
+            const flame = document.getElementById('candle-flame');
+            const glow = document.getElementById('candle-glow');
+
+            if (isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                startBtn.innerText = '시작';
+                flame.classList.remove('active');
+                glow.classList.remove('active');
+            } else {
+                isRunning = true;
+                startBtn.innerText = '일시정지';
+                flame.classList.add('active');
+                glow.classList.add('active');
+
+                timerInterval = setInterval(() => {
+                    if (currentMode === 'timer') {
+                        if (timeLeft > 0) {
+                            timeLeft--;
+                            updateTimerDisplay(timeLeft);
+                        } else {
+                            finishTimer();
+                        }
+                    } else {
+                        stopwatchTime++;
+                        updateTimerDisplay(stopwatchTime);
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            document.getElementById('btn-start').innerText = '시작';
+            document.getElementById('candle-flame').classList.remove('active');
+            document.getElementById('candle-glow').classList.remove('active');
+
+            if (currentMode === 'timer') {
+                timeLeft = totalSelectedTime;
+                updateTimerDisplay(timeLeft);
+            } else {
+                stopwatchTime = 0;
+                updateTimerDisplay(0);
+            }
+        }
+
+        function finishTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            document.getElementById('btn-start').innerText = '시작';
+            document.getElementById('candle-flame').classList.remove('active');
+            document.getElementById('candle-glow').classList.remove('active');
+
+            const elapsedMinutes = Math.floor(totalSelectedTime / 60);
+            appData.totalTime += elapsedMinutes * 60;
+            appData.cycles += 1;
+
+            let rewardMsg = '';
+            if (elapsedMinutes >= 120) {
+                appData.inventory.water += 5;
+                rewardMsg = '물뿌리개 🚿 5개';
+            } else if (elapsedMinutes >= 60) {
+                appData.inventory.water += 2;
+                rewardMsg = '물뿌리개 🚿 2개';
+            } else if (elapsedMinutes >= 30) {
+                appData.inventory.water += 1;
+                rewardMsg = '물뿌리개 🚿 1개';
+            } else if (elapsedMinutes >= 10) {
+                appData.inventory.cloud += 1;
+                rewardMsg = '비구름 🌧️ 1개';
+            }
+
+            saveData();
+            alert(`🎉 집중 세션 완료!\n집중 시간: ${elapsedMinutes}분\n보상: ${rewardMsg || '다음엔 10분 이상 집중해 보상을 노려보세요!'}`);
+            resetTimer();
+        }
+
+        // 집중의 소리 (오디오 로직 + iOS Web Audio API)
+        const audioElements = {
+            nature: document.getElementById('audio-nature'),
+            rain: document.getElementById('audio-rain'),
+            fire: document.getElementById('audio-fire')
+        };
+        let currentPlayingTrack = null;
+
+        // iOS(아이폰) 전용 가상 앰프(GainNode) 세팅
+        let audioCtx = null;
+        const gainNodes = {};
+
+        function initAudioContext() {
+            if (audioCtx) return;
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+
+            audioCtx = new AudioContext();
+
+            Object.keys(audioElements).forEach(key => {
+                const el = audioElements[key];
+                if (el) {
+                    try {
+                        const source = audioCtx.createMediaElementSource(el);
+                        const gainNode = audioCtx.createGain();
+                        const currentVol = parseFloat(document.getElementById('vol-slider')?.value || 0.5);
+                        gainNode.gain.value = currentVol;
+                        
+                        source.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+                        gainNodes[key] = gainNode;
+                    } catch (e) {
+                        console.log('GainNode 이미 연결됨:', e);
+                    }
+                }
+            });
+        }
+
+        function unlockAudioContext() {
+            initAudioContext();
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function toggleAudio(track) {
+            unlockAudioContext(); // 아이폰 오디오 잠금 해제
+
+            const vinyl = document.getElementById('vinyl');
+            const tonearm = document.getElementById('tonearm');
+
+            if (currentPlayingTrack === track) {
+                audioElements[track].pause();
+                currentPlayingTrack = null;
+                vinyl.classList.remove('playing');
+                tonearm.classList.remove('playing');
+                updateAudioButtons(null);
+                return;
+            }
+
+            Object.keys(audioElements).forEach(key => audioElements[key].pause());
+
+            audioElements[track].play().catch(e => console.log('Audio playback prevented:', e));
+            currentPlayingTrack = track;
+            vinyl.classList.add('playing');
+            tonearm.classList.add('playing');
+            updateAudioButtons(track);
+        }
+
+        function updateAudioButtons(activeTrack) {
+            document.querySelectorAll('.audio-btn, .fa-btn').forEach(btn => {
+                if (btn.dataset.track === activeTrack) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        function changeVolume(val) {
+            unlockAudioContext();
+            const numericVal = parseFloat(val);
+
+            // 1. 삼성폰/노트북/PC용 기본 오디오 볼륨 설정
+            Object.values(audioElements).forEach(audio => {
+                if (audio) audio.volume = numericVal;
+            });
+
+            // 2. 아이폰(iOS) 전용 가상 앰프 볼륨 설정
+            Object.keys(gainNodes).forEach(key => {
+                if (gainNodes[key]) {
+                    gainNodes[key].gain.value = numericVal;
+                }
+            });
+
+            // 슬라이더 위치 동기화
+            const volSlider = document.getElementById('vol-slider');
+            const miniVolSlider = document.getElementById('mini-vol-slider');
+            if (volSlider) volSlider.value = numericVal;
+            if (miniVolSlider) miniVolSlider.value = numericVal;
+        }
+
+        // 진단 테스트 로직
+        function submitTest() {
+            const form = document.getElementById('mbti-test-form');
+            const formData = new FormData(form);
+            let score = 0;
+            let count = 0;
+
+            for (let i = 1; i <= 12; i++) {
+                const val = formData.get(`q${i}`);
+                if (val) {
+                    score += parseInt(val, 10);
+                    count++;
+                }
+            }
+
+            if (count < 12) {
+                alert('모든 질문에 답해주세요!');
+                return;
+            }
+
+            document.getElementById('test-questions').style.display = 'none';
+            const resultContainer = document.getElementById('test-result-container');
+            const resultContent = document.getElementById('test-result-content');
+            resultContainer.style.display = 'block';
+
+            let levelBadge = '';
+            let typeTitle = '';
+            let desc = '';
+            let solution = '';
+
+            if (score <= 24) {
+                levelBadge = '<span class="result-level-badge result-level-1">🟢 뇌 피로도: 양호 (안정 상태)</span>';
+                typeTitle = '🌿 자율적 몰입형 (Focus Master)';
+                desc = '현재 뇌의 피로도가 낮고 인지적 조절 능력이 잘 유지되고 있습니다. 디지털 자극에 흔들리지 않고 스스로 원하는 목표에 집중할 수 있는 훌륭한 상태입니다.';
+                solution = '지금의 우수한 집중 루틴을 유지하세요! 뽀모도로 기법(50분 집중 / 10분 휴식)과 식물 수집을 병행하면 오랜 시간 흔들림 없는 몰입이 가능합니다.';
+            } else if (score <= 42) {
+                levelBadge = '<span class="result-level-badge result-level-2">🟡 뇌 피로도: 주의 (주의력 분산)</span>';
+                typeTitle = '⚡ 자극 탐색형 (Dopamine Seeker)';
+                desc = '스마트폰 알림이나 숏폼 콘텐츠 등 즉각적인 도파민 자극에 뇌가 다소 익숙해져 있습니다. 집중을 시작하기까지 마찰력이 크고 딴생각이 들기 쉽습니다.';
+                solution = '작은 성공 경험부터 시작해 보세요! 10분 타이머로 짧게 시작하고, 집중의 소리(백색소음)를 틀어 주변 시각/청각 자극을 차단하는 것이 효과적입니다.';
+            } else {
+                levelBadge = '<span class="result-level-badge result-level-3">🔴 뇌 피로도: 심각 (번아웃 위험)</span>';
+                typeTitle = '🌫️ 뇌 안개형 (Brain Fog & Exhausted)';
+                desc = '뇌에 인지 과부하가 심하게 누적되어 무기력함과 조급함을 동시에 느끼는 상태입니다. 무언가를 시작하려고 해도 생각의 안개가 끼어 쉽게 피로해집니다.';
+                solution = '지금 가장 필요한 것은 \'스마트한 휴식\'입니다. [잡생각 쓰레기통]에 걱정을 모두 적어 태워버린 뒤, 타이머 없이 숲속 소리를 들으며 뇌에 휴식을 선물하세요.';
+            }
+
+            const fatiguePercent = Math.round(((score - 12) / 48) * 100);
+
+            resultContent.innerHTML = `
+                ${levelBadge}
+                <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">${typeTitle}</h2>
+                <div class="result-card-box">
+                    <div class="result-info-row"><strong>진단 설명:</strong> ${desc}</div>
+                    <div class="result-info-row" style="margin-top: 0.5rem;"><strong>💡 맞춤 솔루션:</strong> ${solution}</div>
+                </div>
+                <div class="indicator-box">
+                    <div class="indicator-item">
+                        <div class="indicator-label"><span>뇌 피로도 지수</span><span>${fatiguePercent}%</span></div>
+                        <div class="indicator-bg"><div class="indicator-fill" style="width: ${fatiguePercent}%;"></div></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function retryTest() {
+            document.getElementById('mbti-test-form').reset();
+            document.getElementById('test-questions').style.display = 'block';
+            document.getElementById('test-result-container').style.display = 'none';
+        }
+
+        // 관리자 도구
+        function checkAdminPassword() {
+            const pw = prompt('관리자 비밀번호를 입력하세요:');
+            if (pw === '1234') {
+                toggleAdminPanel();
+            } else if (pw !== null) {
+                alert('비밀번호가 올바르지 않습니다.');
+            }
+        }
+
+        function toggleAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function adminFinishTimerImmediate() {
+            if (!isRunning) {
+                alert('타이머가 실행 중이지 않습니다.');
+                return;
+            }
+            timeLeft = 1;
+            alert('타이머 시간을 1초로 설정했습니다.');
+        }
+
+        function adminMaxOutExp() {
+            if (!appData.currentPlantType) {
+                alert('먼저 씨앗을 선택해주세요.');
+                return;
+            }
+            const pData = getPlantData();
+            appData.plantExp = pData.maxExp;
+            saveData();
+            alert('식물이 최고 레벨에 달성했습니다!');
+        }
+
+        function adminAddItems() {
+            appData.inventory.cloud += 50;
+            appData.inventory.water += 50;
+            saveData();
+            alert('비구름 50개, 물뿌리개 50개가 추가되었습니다.');
+        }
+
+        function adminAddStats() {
+            appData.totalTime += 3600;
+            appData.cycles += 2;
+            saveData();
+            alert('집중 시간 1시간, 완료 세션 2회가 추가되었습니다.');
+        }
+
+        function adminAddCompletedPlant() {
+            const types = ['DAISY', 'ROSE', 'TREE'];
+            const emojis = { DAISY: '🌼', ROSE: '🌹', TREE: '🌳' };
+            const randType = types[Math.floor(Math.random() * types.length)];
+            const today = new Date().toISOString().split('T')[0];
+
+            appData.completedPlants.push({
+                id: Date.now(),
+                type: randType,
+                emoji: emojis[randType],
+                completedDate: today
+            });
+            saveData();
+            alert(`정원에 ${emojis[randType]} 식물이 추가되었습니다.`);
+        }
+
+        function adminResetData() {
+            if (confirm('정말로 모든 데이터를 초기화하시겠습니까?')) {
+                localStorage.removeItem('focusApp_v16');
+                localStorage.removeItem('focusApp_seenTutorial');
+                location.reload();
+            }
+        }
+
+        // 초기 실행 설정
+        window.addEventListener('DOMContentLoaded', () => {
+            checkFirstVisit();
+            saveData();
+            renderTodos();
+            updateTimerDisplay(timeLeft);
+            changeVolume(0.5);
+        });
+
+        // 첫 터치 시 아이폰 오디오 권한 자동 활성화
+        document.body.addEventListener('click', () => {
+            unlockAudioContext();
+        }, { once: true });
+</script>
+</body>
+</html>
